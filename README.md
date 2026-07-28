@@ -41,13 +41,14 @@ For this project this project I will use the Samsung Galaxy S21 Ultra 5G (2021-r
 - Kernel: Linux-based Android kernel
 - Target use: eBPF process monitoring and anomaly detection experiments
 
-### Tech Stack ### 
-C -> (userspace collector) collects raw kernel data from RingBuff Map Type
-Pyhton -> Pandas (analysis and quatization)
-eBPF -> (kernel-side event collection)
-libbpf + CO-RE -> (precompiled, Compile One Run Everywhere workflow)
-bpftool -> (generates vmlinux.h and skeleton headers)
-Clang/LLVM -> (build compiles the BPF C to bytecode)
+### Tech Stack
+
+- **C** -> (userspace collector) collects raw kernel data from RingBuff Map Type
+- **Python -> Pandas** -> (analysis and quantization)
+- **eBPF** -> (kernel-side event collection)
+- **libbpf + CO-RE** -> (precompiled, Compile Once Run Everywhere workflow)
+- **bpftool** -> (generates vmlinux.h and skeleton headers)
+- **Clang/LLVM** -> (build compiles the BPF C to bytecode)
 
 
 ## Project Structure ## 
