@@ -5,7 +5,10 @@ A behavioral anomaly detector that learns what normal activity looks like on a m
 
 ### Goal ###
 
-Most security monitoring data is processed and analyzed on the cloud. Although this has been the common practice, constraints like latency, privacy and battery power proves to be inefficient for edge devices. Using kernel technologies like eBPF I will collect raw kernel data to train a lightweight detection model so the analysis occurs natively (on device) ensuring efficiency and privacy.
+Most security monitoring data is processed and analyzed on the cloud. Although this has been the common practice, constraints like latency, privacy and battery power proves to be inefficient for edge devices. Using kernel technologies like eBPF I will collect raw kernel data to train a lightweight detection model so the analysis occurs natively (on device) within a real device's power, thermal, and memory limits.
+
+For this project this project I will use the Samsung Galaxy S21 Ultra 5G (2021-release). *** The Phone is not doing the detection itself, I am using this device as my edge deployment target and benchmark rig. *** The device will be used to measure the accuracy versus efficiency tradeoff of compressing an anomaly-detection model for edge deployment, validated on real mobile hardware under sustained load. I will "stress the device" running the model continuously until the device reaches higher temperatures to measure how performance degrades to show the difference between a benchmark number compared to a number that holds up when scaled. 
+
 
 ## Test Device Specifications
 
@@ -21,10 +24,10 @@ Most security monitoring data is processed and analyzed on the cloud. Although t
 - NPU: Dual-core AI accelerator
 
 **Memory**
-- RAM: 12GB / 16GB LPDDR5
+- RAM: 12GB LPDDR5
 - Memory bandwidth: Up to 51.2 GB/s
 - Storage: UFS 3.1
-- Storage options: 128GB, 256GB, 512GB
+- Storage option: 128GB
 
 **Power**
 - Battery: 5000 mAh
@@ -37,6 +40,15 @@ Most security monitoring data is processed and analyzed on the cloud. Although t
 - Architecture: ARM64 (aarch64)
 - Kernel: Linux-based Android kernel
 - Target use: eBPF process monitoring and anomaly detection experiments
+
+### Tech Stack ### 
+C -> (userspace collector) collects raw kernel data from RingBuff Map Type
+Pyhton -> Pandas (analysis and quatization)
+eBPF -> (kernel-side event collection)
+libbpf + CO-RE -> (precompiled, Compile One Run Everywhere workflow)
+bpftool -> (generates vmlinux.h and skeleton headers)
+Clang/LLVM -> (build compiles the BPF C to bytecode)
+
 
 ## Project Structure ## 
 
