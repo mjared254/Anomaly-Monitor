@@ -46,8 +46,9 @@ static void json_escape(char *dst, size_t cap, const char *src) {
     dst[j] = '\0';
 }
 
-static int event_handler(void *ctx, void * data, size_t len) {
-    (void)ctx; void(len);
+//Ring bug calls this function, once per event
+static int event_handler(void *ctx, void *data, size_t len) {
+    (void)ctx; (void)len;
 
     const struct event *e = data;
 
@@ -57,17 +58,18 @@ static int event_handler(void *ctx, void * data, size_t len) {
     //          dst array,  cap,   src -> reads the executable path
     json_escape(path, sizeof(path), e->path);
 
+    //Printing JSON File
     printf("{\"ts\" :%llu, \"type\" :\"%s\", \"pid\" :%u, \"ppid\" :%u,"
-           "\"uid\" :%u, \"comm\":\"%s\", \"path\" :\%s\"}\n",
+           "\"uid\" :%u, \"comm\":\"%s\", \"path\" :\"%s\"}\n",
            (unsigned long long)(boot_epoch_ns + e->ts_ns), // time system booted (ns) + the time an event happens after boot.
             e->type == EVT_EXEC ? "exec" : "open",
-            e->pid, e->ppid, e->uid, e->comm, path);    
+            e->pid, e->ppid, e->uid, e->comm, path); //reading from event 
     return 0;
 }
 
 int main(void) {
     struct collector_bpf *skel = NULL;
-    struct ring_buffer * rb = NULL;
+    struct ring_buffer *rb = NULL;
     int err = 0;
 
     signal(SIGINT, on_signial);//listens for CTRL + C to terminate 
@@ -76,7 +78,37 @@ int main(void) {
     calc_boot();
     setvbuf(stdout, NULL, _IOLBF, 0); // Changes buffering mode, pointer and size for open file stream
     
-    
+
+    // Error Handling, Accessing information from the Kernel
+    skel = collector_bpf_open();
+    if (!skell) { fprintf(stderr, "Open Skeleton Failed\n") return 1;}
+
+    skel->rodata->self_pid = get_pid();
+
+    err = collector_bpf_load(skel);
+    if (err) { fprintf(stderr, "Load Failed: &d/n", err); goto cleanup; }
+
+    err = collector_bpf_attach(skel);
+
+    if(err) {fprintf(stderr, "Attach Failed: %d/n", err); goto cleanup; }
+
+    rb = ring_buffer_new(bpf_map__fd(skel->map.events), event_handler, NULL, NULL);
+
+    if(!rb) {fpringf(stderr, "Ring Buffer Failed\n"); err = -1; goto cleanup;}
+
+    fprintf(stderr, "Collecting - CTRL +C to stop");
+
+    while(!stop) {
+        err = ring_buffer__poll(rb, 100 /* ms */);
+        if(err == -EINTR) {err = 0; break;}
+        if(err < 0) {fprintf(stderr, "Poll Error: %d\n", err); break;}
+    }
+
+    cleanup:
+        //releases all the memory
+        ring_buffer_free(rb);
+        collector_bpf__destory(skel);
+        return err < 0 ? 1 : 0;
 
 
 }
