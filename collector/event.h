@@ -14,13 +14,13 @@
 #define EVT_OPEN 1 //1 -> A File Open Event
 
 struct event {
-    __u64 nanotime; //64-bit unsigned integer to store the time of the event in nanoseconds
+    __u64 ts_ns; //64-bit unsigned integer to store the time of the event in nanoseconds
 
     __u32 pid; //32-bit unsigned integer to store the process ID of the event
 
     __u32 ppid; //32-bit unsigned integer to store the parent process ID of the event
 
-    __u32 userId; //32-bit unsigned integer to store the user ID of the event
+    __u32 uid; //32-bit unsigned integer to store the user ID of the event
 
     __u32 type; //32-bit unsigned integer to store the type of the event (execution or file open)
 
@@ -28,4 +28,4 @@ struct event {
     char path[PATH_LEN];
 };
 
-#endif
+//#endif

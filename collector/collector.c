@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <time.h>
 #include <unistd.h>
+#include <signal.h>
 #include <bpf/libbpf.h>
 #include "collector.skel.h"
 #include "event.h"
@@ -72,7 +73,7 @@ int main(void) {
     struct ring_buffer *rb = NULL;
     int err = 0;
 
-    signal(SIGINT, on_signial);//listens for CTRL + C to terminate 
+    signal(SIGINT, on_signal);//listens for CTRL + C to terminate 
     signal(SIGTERM, on_signal);
 
     calc_boot();
@@ -80,25 +81,26 @@ int main(void) {
     
 
     // Error Handling, Accessing information from the Kernel
-    skel = collector_bpf_open();
-    if (!skell) { fprintf(stderr, "Open Skeleton Failed\n") return 1;}
+    skel = collector_bpf__open();
+    if (!skel) { fprintf(stderr, "Open Skeleton Failed\n"); return 1;}
 
-    skel->rodata->self_pid = get_pid();
+    skel->rodata->self_pid = getpid();
 
-    err = collector_bpf_load(skel);
-    if (err) { fprintf(stderr, "Load Failed: &d/n", err); goto cleanup; }
+    err = collector_bpf__load(skel);
+    if (err) { fprintf(stderr, "Load Failed: %d\n", err); goto cleanup; }
 
-    err = collector_bpf_attach(skel);
+    err = collector_bpf__attach(skel);
 
-    if(err) {fprintf(stderr, "Attach Failed: %d/n", err); goto cleanup; }
+    if(err) {fprintf(stderr, "Attach Failed: %d\n", err); goto cleanup; }
 
-    rb = ring_buffer_new(bpf_map__fd(skel->map.events), event_handler, NULL, NULL);
+    rb = ring_buffer__new(bpf_map__fd(skel->maps.events), event_handler, NULL, NULL);
 
-    if(!rb) {fpringf(stderr, "Ring Buffer Failed\n"); err = -1; goto cleanup;}
+    if(!rb) {fprintf(stderr, "Ring Buffer Failed\n"); err = -1; goto cleanup;}
 
     fprintf(stderr, "Collecting - CTRL +C to stop");
 
     while(!stop) {
+        //Polls (scans) for avaiable data in the ring buffer.
         err = ring_buffer__poll(rb, 100 /* ms */);
         if(err == -EINTR) {err = 0; break;}
         if(err < 0) {fprintf(stderr, "Poll Error: %d\n", err); break;}
@@ -106,8 +108,8 @@ int main(void) {
 
     cleanup:
         //releases all the memory
-        ring_buffer_free(rb);
-        collector_bpf__destory(skel);
+        ring_buffer__free(rb);
+        collector_bpf__destroy(skel);
         return err < 0 ? 1 : 0;
 
 
