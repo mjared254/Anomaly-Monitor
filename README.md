@@ -5,7 +5,7 @@ A behavioral anomaly detector that learns what normal activity looks like on a m
 
 ### Goal ###
 
-Most security monitoring data is processed and analyzed on the cloud. Although this has been the common practice, constraints like latency, privacy and battery power proves to be inefficient for edge devices. Using kernel technologies like eBPF I will collect raw kernel data to train a lightweight detection model so the analysis occurs natively (on device) within a real device's power, thermal, and memory limits.
+Most security monitoring data is processed and analyzed on the cloud. Although this has been the common practice, constraints like latency, privacy and battery power proves to be inefficient for edge devices. Using kernel technologies like eBPF I will collect raw kernel data to train a lightweight detection model using synthetic anomalies, so the analysis occurs natively (on device) within a real device's power, thermal, and memory limits.
 
 For this project this project I will use the Samsung Galaxy S21 Ultra 5G (2021-release). *** The Phone is not doing the detection itself, I am using this device as my edge deployment target and benchmark rig. *** The device will be used to measure the accuracy versus efficiency tradeoff of compressing an anomaly-detection model for edge deployment, validated on real mobile hardware under sustained load. I will "stress the device" running the model continuously until the device reaches higher temperatures to measure how performance degrades to show the difference between a benchmark number compared to a number that holds up when scaled. 
 
