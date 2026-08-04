@@ -5,7 +5,7 @@ import pandas as pd
 #Path object that represents a Directory, returns pointer to user's home directory
 RAW = Path.home() / "anomaly-monitor"/ "data"/ "raw"
 #Path object saves table to windows.csv
-OUT = Path.home() / "anomaly-monitor"/ "data" / "raw" / "windows.csv"
+OUT = Path.home() / "anomaly-monitor"/ "data" / "features" / "windows.csv"
 WINDOW_NS = 10 * 1_000_000_000 
 
 #Creates Table for given file f
@@ -16,7 +16,7 @@ def load_session(f):
     for line in f.read_text().splitlines():
         #parse each JSON line into a Python Dictionary
         try:
-            rows.append(json.load(line))
+            rows.append(json.loads(line))
         except json.JSONDecodeError:
             continue
             #DataFrame is a 2D Tabular Data Structure with rows,columns.
@@ -77,19 +77,19 @@ def main():
         df["window"] = (df.ts - df.ts.min()) // WINDOW_NS
 
         #groups by bucket and feeds each time window bucket to my features_for_window funciton     
-        feats = df.groupbuy["window"].apply(features_for_window, include_groups=False)
+        feats = df.groupby("window").apply(features_for_window, include_groups=False)
 
         #assigning new column sessions = filename excluding filepath or exentension
         feats["session"] = f.stem
-        feats["label"] = "anomaly" if f.stem.startswith("anomaly") else baseline
+        feats["label"] = "anomaly" if f.stem.startswith("anomaly") else "baseline"
         all_windows.append(feats)
 
         print(f"{f.stem}: has {len(feats)} windows")
 
-        #combines windows into one dataframe
-        result = pd.concat(all_windows, ignore_index=False)
-        result.to.csv(OUT, index=False)
-        print(f"\nOutput: {len(struct)} windows -> {OUT}")
+    #combines windows into one dataframe
+    result = pd.concat(all_windows, ignore_index=False)
+    result.to_csv(OUT, index=False)
+    print(f"\nOutput: {len(result)} windows -> {OUT}")
 
 if __name__ == "__main__":
     main()
