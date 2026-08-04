@@ -8,6 +8,7 @@ RAW = Path.home() / "anomaly-monitor"/ "data"/ "raw"
 OUT = Path.home() / "anomaly-monitor"/ "data" / "raw" / "windows.csv"
 WINDOW_NS = 10 * 1_000_000_000 
 
+#Creates Table for given file f
 def load_session(f):
     #list of dictionaries
     rows = []
@@ -39,10 +40,11 @@ def chain_depth(pids, parents):
         best = max(best, depth)
     return best
 
+#Generates the five features/properties that describes whath happens in each time window.
 def features_for_window(g):
     #oldest event ts - newest event ts to get the duration a process was active in nanoseconds-> then convert into seconds
     span_sec = max((g.ts.max()- g.ts.min()) / 1e9, 1e-9)
-    execs = (g.type == "exec").sum()
+    execs = (g.type == "exec").sum() #gives scalar
     
     return pd.Series({
         "events_per_sec":   len(g) / 10.0,
@@ -55,6 +57,7 @@ def features_for_window(g):
         "max_chain_depth":    chain_depth(g.pid.tolist(), g.ppid.tolist())
 
     })
+
 
 def main():
     all_windows = []
@@ -69,3 +72,28 @@ def main():
         if df.empty:
             print(f"Skipping Empty Fille {f.name}")
             continue
+        
+        #timestamp from colum - earliest time found // 10 billion Nanoseconds to get the corresponding bucket number.
+        df["window"] = (df.ts - df.ts.min()) // WINDOW_NS
+
+        #groups by bucket and feeds each time window bucket to my features_for_window funciton     
+        feats = df.groupbuy["window"].apply(features_for_window, include_groups=False)
+
+        #assigning new column sessions = filename excluding filepath or exentension
+        feats["session"] = f.stem
+        feats["label"] = "anomaly" if f.stem.startswith("anomaly") else baseline
+        all_windows.append(feats)
+
+        print(f"{f.stem}: has {len(feats)} windows")
+
+        #combines windows into one dataframe
+        result = pd.concat(all_windows, ignore_index=False)
+        result.to.csv(OUT, index=False)
+        print(f"\nOutput: {len(struct)} windows -> {OUT}")
+
+if __name__ == "__main__":
+    main()
+
+
+
+
