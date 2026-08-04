@@ -9,10 +9,11 @@ OUT = Path.home() / "anomaly-monitor"/ "data" / "raw" / "windows.csv"
 WINDOW_NS = 10 * 1_000_000_000 
 
 def load_session(f):
+    #list of dictionaries
     rows = []
-    #with splitlines we take the giant file string and turns the whole file into a list of indivual line strings
+    #read the file's text, split into individual lines 
     for line in f.read_text().splitlines():
-        #takes json into a python object
+        #parse each JSON line into a Python Dictionary
         try:
             rows.append(json.load(line))
         except json.JSONDecodeError:
@@ -44,5 +45,27 @@ def features_for_window(g):
     execs = (g.type == "exec").sum()
     
     return pd.Series({
-        
+        "events_per_sec":   len(g) / 10.0,
+        "exec_ratio":       execs / len(g), #number of events / length of process window
+        "unique_comms":     g.comm.nunique(), #number of unqiue process names (values)
+        #filter dataframe by finding all events of type 'open', group rows into buckets based on thier PID, get the number of rows in each bucket for each PID
+        #max finds the pid with the most events of type 'open'
+        "max_files_per_proc": g[g.type == "open"].groupby("pid").size().max()
+                              if(g.type == "open").any() else 0,
+        "max_chain_depth":    chain_depth(g.pid.tolist(), g.ppid.tolist())
+
     })
+
+def main():
+    all_windows = []
+    #path object to the user's home directoty, glob finds the pathnames with the given patten.
+    files = sorted(RAW.glob("*.jsonl"))
+
+    if not files:
+        sys.exit(f" no files found in {RAW}")
+    # for each data file(f) in files create a DataFrame by calling the load_session function that creates a Table based on the data
+    for f in files:
+        df = load_session(f)
+        if df.empty:
+            print(f"Skipping Empty Fille {f.name}")
+            continue
