@@ -13,11 +13,17 @@ def main():
     df = pd.read_csv(CSV)
     
     #Do this when you have different value types 100 vs 1.0
-    #turns raw value into a scalar. to mesure devation
-    scalar = StandardScaler()
+    #Empty Scalar Object
+    scaler = StandardScaler()
 
-    #calculates the mean and deviation for all 5 features
+    #fit calculates the mean and deviation for all 5 features
+    #transform applies the formula value - mean / std_dev for each row giving each a scaled value
     #X is what we will feed our Isolation Forest
     X = scaler.fit_transform(df[FEATURES])
 
     baseline_mask = (df.label == "baseline").values
+    model = IsolationForest(n_estimators=200, contamination="auto", random_state=42)
+    
+    #Numpy automatically filters out the true values.
+    #fit reads the data and learns from and stores it in my Isolation Forest Object
+    model.fit(X[baseline_mask])
