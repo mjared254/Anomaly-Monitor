@@ -40,6 +40,24 @@ def chain_depth(pids, parents):
         best = max(best, depth)
     return best
 
+
+def chain_homogeneity(pids, parents, comm):
+    parent_of = dict(zip(pids, parents))
+    comm_of = dict(zip(pids, comm))
+    best_len, best_names = 0, set()
+    for pid in parent_of:
+        depth, current, seen = 1, pid, set()
+        names = {comm_of.get(pid, "?")}
+        while current in parent_of and current not in seen:
+            seen.add(current)
+            current = parent_of[current]
+            names.add(comm_of.get(current, "?"))
+            depth += 1
+            if depth > best_len:
+                best_len, best_names = depth, names
+    return len(best_names) if best_len > 1 else 1
+
+
 #Generates the five features/properties that describes whath happens in each time window.
 def features_for_window(g):
     #oldest event ts - newest event ts to get the duration a process was active in nanoseconds-> then convert into seconds
