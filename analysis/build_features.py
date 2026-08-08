@@ -58,15 +58,14 @@ def chain_homogeneity(pids, parents, comm):
     return len(best_names) if best_len > 1 else 1
 
 #counts how many children a single Parent ID has.
-def max_children(parents):
-    counts = {}
+def max_children(pids, parents):
+    children = {}
 
-    for p in parents:
-        #for p (current PPID) set its value to the # of children it has.
-        #if no children set its default value to 0 add one to account for the parent ID
-        counts[p] = counts.get(p, 0) + 1
-        return max(counts.values()) if counts else 0
-
+    for child, parent in zip(pids, parents):
+        if parent not in children:
+            children[parent] = set()
+        children[parent].add(child)
+    return max(len(s) for s in children.values()) if children else 0
 
 #Generates the five features/properties that describes whath happens in each time window.
 def features_for_window(g):
@@ -84,8 +83,8 @@ def features_for_window(g):
                               if(g.type == "open").any() else 0,
         "max_chain_depth":    chain_depth(g.pid.tolist(), g.ppid.tolist()),
         "chain_homogeneity": chain_homogeneity(g.pid.tolist(), g.ppid.tolist(),
-                                                g.comm.tolist())
-        "max_children":      max_children(g.ppid.tolist()),
+                                                g.comm.tolist()),
+        "max_children_per_proc":      max_children(g.pid.tolist(), g.ppid.tolist()),
 
     })
 

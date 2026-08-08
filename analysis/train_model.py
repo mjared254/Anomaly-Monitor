@@ -4,7 +4,7 @@ from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
 
 FEATURES = ["events_per_sec", "exec_ratio", "unique_comms", "max_files_per_proc",
-            "max_chain_depth", "chain_homogeneity", "max_children"]
+            "max_chain_depth", "chain_homogeneity", "max_children_per_proc"]
 
 CSV = Path.home() / "anomaly-monitor" / "data" / "features" / "windows.csv"
 
@@ -52,6 +52,27 @@ def main():
     else:
         print("OVERLAP: at least one anomaly hides among the baselines")
 
+def save_model():
+    #libary for saving python objects to disk then loading them back
+    #saves to disk, not memory
+    import joblib
+    df = pd.read_csv(CSV)
+
+    scaler = StandardScaler()
+    X = scaler.fit_transform(df[FEATURES])
+
+    model = IsolationForest(n_estimators=200, contamination="auto", random_state=42)
+
+    model.fit(X[(df.label == "baseline").values])
+
+    out = CSV.parent / "model.joblib"
+    #converts the live objects into bytes written to a file, load this with joblib.load()
+    #saves all three things at once
+    joblib.dump({"model": model, "scaler": scaler, "features": FEATURES}, out)
+
+    print(f"saved -> {out}")
+
 
 if __name__ == "__main__":
     main()
+    save_model()
