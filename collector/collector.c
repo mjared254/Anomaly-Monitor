@@ -87,6 +87,7 @@ int main(void) {
     skel->rodata->self_pid = getpid();
 
     err = collector_bpf__load(skel);
+    //if non zero execute 
     if (err) { fprintf(stderr, "Load Failed: %d\n", err); goto cleanup; }
 
     err = collector_bpf__attach(skel);

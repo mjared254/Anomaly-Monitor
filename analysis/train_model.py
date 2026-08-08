@@ -27,3 +27,5 @@ def main():
     #Numpy automatically filters out the true values.
     #fit reads the data and learns from and stores it in my Isolation Forest Object
     model.fit(X[baseline_mask])
+
+    df["anomaly-score"] = -model.score_samples(X)
