@@ -1,7 +1,7 @@
-import pathlib as Path
+from pathlib import Path
 import pandas as pd
-import sklearn.ensemble import IsolationForest
-import sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import IsolationForest
+from sklearn.preprocessing import StandardScaler
 
 FEATURES = ["events_per_sec", "exec_ratio", "unique_comms", "max_files_per_proc",
             "max_chain_depth"]
@@ -40,7 +40,7 @@ def main():
                                         #highest to lowest instead of lowest to highest
     print(summary)
 
-    by_sess =(df.grouby["label", "session"]) ["anomaly-score"].mean()
+    by_sess = df.groupby(["label", "session"]) ["anomaly-score"].mean()
     worst_anomaly = by_sess["anomaly"].min()
     best_baseline = by_sess["baseline"].max()
 
