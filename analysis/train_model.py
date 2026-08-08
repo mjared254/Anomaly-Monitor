@@ -4,7 +4,7 @@ from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
 
 FEATURES = ["events_per_sec", "exec_ratio", "unique_comms", "max_files_per_proc",
-            "max_chain_depth"]
+            "max_chain_depth", "chain_homogeneity", "max_children"]
 
 CSV = Path.home() / "anomaly-monitor" / "data" / "features" / "windows.csv"
 

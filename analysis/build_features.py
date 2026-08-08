@@ -40,7 +40,7 @@ def chain_depth(pids, parents):
         best = max(best, depth)
     return best
 
-
+#Finds the deepest ancestry chain, the counts how many distinct programs names appear along it.
 def chain_homogeneity(pids, parents, comm):
     parent_of = dict(zip(pids, parents))
     comm_of = dict(zip(pids, comm))
@@ -57,6 +57,16 @@ def chain_homogeneity(pids, parents, comm):
                 best_len, best_names = depth, names
     return len(best_names) if best_len > 1 else 1
 
+#counts how many children a single Parent ID has.
+def max_children(parents):
+    counts = {}
+
+    for p in parents:
+        #for p (current PPID) set its value to the # of children it has.
+        #if no children set its default value to 0 add one to account for the parent ID
+        counts[p] = counts.get(p, 0) + 1
+        return max(counts.values()) if counts else 0
+
 
 #Generates the five features/properties that describes whath happens in each time window.
 def features_for_window(g):
@@ -72,7 +82,10 @@ def features_for_window(g):
         #max finds the pid with the most events of type 'open'
         "max_files_per_proc": g[g.type == "open"].groupby("pid").size().max()
                               if(g.type == "open").any() else 0,
-        "max_chain_depth":    chain_depth(g.pid.tolist(), g.ppid.tolist())
+        "max_chain_depth":    chain_depth(g.pid.tolist(), g.ppid.tolist()),
+        "chain_homogeneity": chain_homogeneity(g.pid.tolist(), g.ppid.tolist(),
+                                                g.comm.tolist())
+        "max_children":      max_children(g.ppid.tolist()),
 
     })
 
