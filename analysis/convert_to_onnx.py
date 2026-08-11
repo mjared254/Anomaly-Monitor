@@ -9,6 +9,9 @@ FEAT_DIR = Path.home() / "anomaly-monitor" / "data" / "features"
 
 
 #Converts my Isolation Forest to ONNX (static graph) in bytes to enable phone's runtime to execute
+#converts my original model to a ONNX form
+
+#model.joblib -> model_fp32.onnx
 
 def main():
     #unpacking the bundle, bundle includes model, scaler and features
