@@ -13,7 +13,7 @@ def main():
 
 	df = pd.read_csv(FEAT_DIR / "windows.csv")
 	#scale the values but save them as 32-bit floats (onnx expects 32-bit)
-	X = scaler.transform(df[features]).astype(np, float32)
+	X = scaler.transform(df[features]).astype(np.float32)
 	#-, higher = anomalous instead of higher = normal
 	#evluates my Isolation Forest, nothing new yet
 	sklearn_scores = -model.score_samples(X)
@@ -34,7 +34,7 @@ def main():
 
 	print(f"max score differenc: {max_diff:.2e}")
 
-	if max_diff < 1e-4L:
+	if max_diff < 1e-4:
 		print("PASS: ONNX model matches sklearn -- safe to benchmark")
 	else:
 		print("FAIL: scores diverge -- do NOT benchmark; conversion is wrong")
