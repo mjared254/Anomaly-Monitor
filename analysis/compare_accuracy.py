@@ -3,14 +3,18 @@ import joblib
 import numpy as np
 import pandas as pd
 
-FEAT_DIR = Path.home() / "anomaly-montor" / "data" / "features"
+#compares the accuracy between my original model and compressed variant
+#used spearmanr to take the anomaly score generated from Isolation Forest (from scaled values)
+#speamanr compares how both models rank sessions, returning a correlationn coefficent from -1 to 1
+
+FEAT_DIR = Path.home() / "anomaly-monitor" / "data" / "features"
 
 # we take in a bundle_name -> model
 def scores_for(bundle_name, df):
 	#unloading the bundle in more compact form
 	b = joblib.load(FEAT_DIR / bundle_name)
 	
-	X = b["scaler"].transform(df["features"]).astype(np.float32)
+	X = b["scaler"].transform(df[b["features"]]).astype(np.float32)
 	
 	return -b["model"].score_samples(X)
 
@@ -21,7 +25,7 @@ def main():
 	df["full"] = scores_for("model.joblib", df) 
 	df["small"] = scores_for("model_small.joblib",df)
 		#bucket rows by label and sessions, only keep full and small columns
-
+		#finds the mean from each bucket, adding each rows scaler and dividing by the # of values
 	summary = (df.groupby(["label", "session"])[["full", "small"]]
                  .mean().round(3).sort_values("full", ascending=False))
 	print(summary)
