@@ -25,7 +25,7 @@ def main():
     # Model expects 32-bit floats, 		any numbers of rows, maximum number of rows
 
     #FloatTensorType dictates the format of the data going in, not storing anything yet
-    #Our input is called "float_input" and its a float tensor of shape (any rows, 7 columns, as 32-bit floats)
+    #Our input is called "float_input" and its a float tensor of shape of model (any rows, 7 columns, as 32-bit floats)
     initial_type = [("float_input", FloatTensorType([None, n_features]))]
 
 

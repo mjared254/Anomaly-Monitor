@@ -38,3 +38,7 @@ env/
 
 data/features/*.csv
 data/features/*.joblib
+
+data/features/*.onnx
+data/features/*.joblib
+data/features/*.csv
