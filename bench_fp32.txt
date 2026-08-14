@@ -1,6 +1,0 @@
-Model:		model_fp32.onnx
-Size:		 1236.0 KB 
-Latency p50:	 2.4292 mb
-Latency p99:	 2.6910 mb
-Latency max:	 3.9257 mb
-Peak Memory: 	  120.9 mb ( Lambda: +0.0)
