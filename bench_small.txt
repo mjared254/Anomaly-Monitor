@@ -1,0 +1,6 @@
+Model:		model_small.onnx
+Size:		  200.4 KB 
+Latency p50:	 0.4541 ms
+Latency p99:	 0.4983 ms
+Latency max:	 0.5333 ms
+Peak Memory: 	   97.9 ms ( Lambda: +0.0)

@@ -1,11 +1,11 @@
 import sys, time, os
-from path import Path
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import onnxruntime as ort
 import psutil #used to get  data on running computer proccess and system hardware usage
 	
-	def main(onnx_path, n_features=7, warmup=50, iters=2000):
+def main(onnx_path, n_features=7, warmup=50, iters=2000):
 	p  = Path(onnx_path)
 	#the model size on disk, remember we save the model in bytes using (SeralizeToString)
 	#this is retreiving the size of the model in bytes and then converting to kilobytes for visbility
@@ -16,10 +16,10 @@ import psutil #used to get  data on running computer proccess and system hardwar
 	#makes a synthetic window (same thing as a synthetic anomaly you created it)
 
 	x = np.random.randn(1, n_features).astype(np.float32)	
-	
+	#loadsm .onnx file from disk to memory, prepares it to run
 	sess = ort.InferenceSession(str(p))
 
-	name = get_inputs()[0].name
+	name = sess.get_inputs()[0].name
 	
 	#runs the model 50 times, gets the cold-start overhead out of the way
 	for _ in range(warmup):
@@ -38,11 +38,19 @@ import psutil #used to get  data on running computer proccess and system hardwar
 		sess.run(None, {name : x})
 		#subtracts after ts - start ts in second then converts to ms
 		#appends each timestamp to array time (array  of durations)
-		times.append((time.perf_counert() - t0)* 1000)
+		times.append((time.perf_counter() - t0)* 1000)
 
 	mem_after = proc.memory_info().rss / 1024 / 1024
 
-	
+	times = np.array(times)
+	print(f"Model:		{p.name}")
+	print(f"Size:		{size_kb:7.1f} KB ")
+	print(f"Latency p50:	{np.percentile(times,50):7.4f} ms")
+	print(f"Latency p99:	{np.percentile(times, 99):7.4f} ms")
+	print(f"Latency max:	{times.max():7.4f} ms")
+	print(f"Peak Memory: 	{mem_after:7.1f} ms ( Lambda: {mem_after-mem_before:+.1f})")
 
+if __name__ == "__main__":
+	main(sys.argv[1] if len(sys.argv) > 1 else "data/features/model_fp32.onnx") 
 
 
