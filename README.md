@@ -66,4 +66,5 @@ The Detection Model was only able to detect 1/3 synthetic anomalies at session l
 
 ## Project Structure ## 
 
-<img width="1234" height="1468" alt="project-structure" src="https://github.com/user-attachments/assets/d87b8a3c-962c-454a-b254-2c0237a27597" />
+<img width="1234" height="1468" alt="project-structure (1)" src="https://github.com/user-attachments/assets/f307f616-6ebb-4e32-b5ed-ad190acf2501" />
+
