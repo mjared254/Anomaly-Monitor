@@ -45,10 +45,10 @@ def main(onnx_path, n_features=7, warmup=50, iters=2000):
 	times = np.array(times)
 	print(f"Model:		{p.name}")
 	print(f"Size:		{size_kb:7.1f} KB ")
-	print(f"Latency p50:	{np.percentile(times,50):7.4f} ms")
-	print(f"Latency p99:	{np.percentile(times, 99):7.4f} ms")
-	print(f"Latency max:	{times.max():7.4f} ms")
-	print(f"Peak Memory: 	{mem_after:7.1f} ms ( Lambda: {mem_after-mem_before:+.1f})")
+	print(f"Latency p50:	{np.percentile(times,50):7.4f} mb")
+	print(f"Latency p99:	{np.percentile(times, 99):7.4f} mb")
+	print(f"Latency max:	{times.max():7.4f} mb")
+	print(f"Peak Memory: 	{mem_after:7.1f} mb ( Lambda: {mem_after-mem_before:+.1f})")
 
 if __name__ == "__main__":
 	main(sys.argv[1] if len(sys.argv) > 1 else "data/features/model_fp32.onnx") 
